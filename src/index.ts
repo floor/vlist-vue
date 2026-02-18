@@ -1,4 +1,4 @@
-// @floor/vlist-vue
+// vlist-vue
 /**
  * Vue composable for vlist - lightweight virtual scrolling
  *
@@ -64,7 +64,7 @@ export interface UseVListReturn<T extends VListItem = VListItem> {
  * @example
  * ```vue
  * <script setup>
- * import { useVList } from '@floor/vlist-vue';
+ * import { useVList } from 'vlist-vue';
  * import { ref } from 'vue';
  *
  * const users = ref([...]);

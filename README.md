@@ -1,11 +1,11 @@
-# @floor/vlist-vue
+# vlist-vue
 
 Vue composable for [vlist](https://github.com/floor/vlist) - lightweight, zero-dependency virtual scrolling.
 
 ## Installation
 
 ```bash
-npm install @floor/vlist @floor/vlist-vue
+npm install @floor/vlist vlist-vue
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ npm install @floor/vlist @floor/vlist-vue
 
 ```vue
 <script setup>
-import { useVList } from '@floor/vlist-vue';
+import { useVList } from 'vlist-vue';
 import '@floor/vlist/styles';
 
 const users = ref([...]);
@@ -37,7 +37,7 @@ const { containerRef, instance } = useVList({
 
 ```vue
 <script>
-import { useVList } from '@floor/vlist-vue';
+import { useVList } from 'vlist-vue';
 
 export default {
   setup() {
