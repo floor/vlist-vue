@@ -1,0 +1,56 @@
+{
+  "name": "@floor/vlist-vue",
+  "version": "0.1.0",
+  "description": "Vue composable for vlist - lightweight virtual scrolling",
+  "author": {
+    "name": "Floor IO",
+    "url": "https://floor.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/floor/vlist-vue.git"
+  },
+  "keywords": [
+    "vlist",
+    "virtual-list",
+    "vue",
+    "composable",
+    "virtual-scrolling",
+    "typescript"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@floor/vlist": "^0.6.0",
+    "vue": ">=3.0.0"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "!dist/**/*.d.ts.map"
+  ],
+  "scripts": {
+    "build": "bun run build.ts",
+    "dev": "bun run build.ts --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
+  },
+  "devDependencies": {
+    "@floor/vlist": "link:../vlist",
+    "@types/bun": "^1.0.0",
+    "bun": "^1.0.0",
+    "typescript": "^5.0.0",
+    "vue": "^3.5.28"
+  }
+}
