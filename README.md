@@ -1,23 +1,19 @@
 # vlist-vue
 
-Vue composable for [vlist](https://github.com/floor/vlist) - lightweight, zero-dependency virtual scrolling.
+Vue composable for [@floor/vlist](https://github.com/floor/vlist) — lightweight, zero-dependency virtual scrolling.
 
-## Installation
+## Install
 
 ```bash
 npm install @floor/vlist vlist-vue
 ```
 
-## Usage
-
-### Composition API
+## Quick Start
 
 ```vue
 <script setup>
 import { useVList } from 'vlist-vue';
 import '@floor/vlist/styles';
-
-const users = ref([...]);
 
 const { containerRef, instance } = useVList({
   item: {
@@ -33,41 +29,16 @@ const { containerRef, instance } = useVList({
 </template>
 ```
 
-### Options API
-
-```vue
-<script>
-import { useVList } from 'vlist-vue';
-
-export default {
-  setup() {
-    return useVList({
-      item: {
-        height: 48,
-        template: (user) => `<div>${user.name}</div>`,
-      },
-      items: [],
-    });
-  },
-};
-</script>
-```
-
 ## API
 
-### `useVList(config)`
+- **`useVList(config)`** — Creates a virtual list. Returns `{ containerRef, instance }`. Config can be a plain object or a reactive `Ref` for automatic updates.
+- **`useVListEvent(instance, event, handler)`** — Subscribe to vlist events with automatic cleanup.
 
-**Parameters:**
-- `config` - VList configuration (same as core vlist, minus `container`)
-  - Can be a reactive `Ref` for automatic updates
-
-**Returns:**
-- `containerRef` - Template ref for the container
-- `instance` - Reactive ref to the vlist instance
+Config accepts all [@floor/vlist options](https://vlist.dev/docs/api/reference) minus `container` (handled by the ref). Feature fields like `adapter`, `grid`, `groups`, `selection`, and `scrollbar` are translated into `.use(withX())` calls automatically.
 
 ## Documentation
 
-For full documentation, see [vlist.dev](https://vlist.dev)
+Full usage guide, feature config examples, and TypeScript types: **[Framework Adapters — Vue](https://vlist.dev/docs/frameworks#vue)**
 
 ## License
 
