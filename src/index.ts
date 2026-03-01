@@ -21,11 +21,11 @@ import type {
   EventHandler,
   Unsubscribe,
 } from "@floor/vlist";
-import { vlist, type BuiltVList } from "@floor/vlist";
+import { vlist, type VList } from "@floor/vlist";
 import {
   withAsync,
   withGrid,
-  withSections,
+  withGroups,
   withSelection,
   withScrollbar,
   withScale,
@@ -40,14 +40,14 @@ export type UseVListConfig<T extends VListItem = VListItem> = Omit<
 
 export interface UseVListReturn<T extends VListItem = VListItem> {
   containerRef: Ref<HTMLDivElement | null>;
-  instance: ShallowRef<BuiltVList<T> | null>;
+  instance: ShallowRef<VList<T> | null>;
 }
 
 export function useVList<T extends VListItem = VListItem>(
   configInput: UseVListConfig<T> | Ref<UseVListConfig<T>>,
 ): UseVListReturn<T> {
   const containerRef = ref<HTMLDivElement | null>(null);
-  const instance = shallowRef<BuiltVList<T> | null>(null);
+  const instance = shallowRef<VList<T> | null>(null);
 
   onMounted(() => {
     const container = containerRef.value;
@@ -85,7 +85,7 @@ export function useVList<T extends VListItem = VListItem>(
           : groupsConfig.headerHeight;
 
       builder = builder.use(
-        withSections({
+        withGroups({
           getGroupForIndex: groupsConfig.getGroupForIndex,
           headerHeight,
           headerTemplate: groupsConfig.headerTemplate,
@@ -143,7 +143,7 @@ export function useVListEvent<
   T extends VListItem,
   K extends keyof VListEvents<T>,
 >(
-  instanceRef: Ref<BuiltVList<T> | null> | ShallowRef<BuiltVList<T> | null>,
+  instanceRef: Ref<VList<T> | null> | ShallowRef<VList<T> | null>,
   event: K,
   handler: EventHandler<VListEvents<T>[K]>,
 ): void {
