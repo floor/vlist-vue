@@ -34,7 +34,7 @@ const { containerRef, instance } = useVList({
 - **`useVList(config)`** — Creates a virtual list. Returns `{ containerRef, instance }`. Config can be a plain object or a reactive `Ref` for automatic updates.
 - **`useVListEvent(instance, event, handler)`** — Subscribe to vlist events with automatic cleanup.
 
-Config accepts all [@floor/vlist options](https://vlist.dev/docs/api/reference) minus `container` (handled by the ref). Feature fields like `adapter`, `grid`, `groups`, `selection`, and `scrollbar` are translated into `.use(withX())` calls automatically.
+Config accepts all [@floor/vlist options](https://vlist.dev/docs/api/reference) minus `container` (handled by the ref). Feature fields like `adapter`, `grid`, `groups`, `selection`, `scrollbar`, and `estimatedHeight` are translated into `.use(withX())` calls automatically.
 
 ## Documentation
 

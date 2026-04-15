@@ -20,10 +20,11 @@ import type {
   VListEvents,
   EventHandler,
   Unsubscribe,
-} from "@floor/vlist";
-import { vlist, type VList } from "@floor/vlist";
+} from "vlist";
+import { vlist, type VList } from "vlist";
 import {
   withAsync,
+  withAutoSize,
   withGrid,
   withMasonry,
   withGroups,
@@ -32,7 +33,7 @@ import {
   withScale,
   withSnapshots,
   withPage,
-} from "@floor/vlist";
+} from "vlist";
 
 export type UseVListConfig<T extends VListItem = VListItem> = Omit<
   VListConfig<T>,
@@ -63,6 +64,19 @@ export function useVList<T extends VListItem = VListItem>(
 
     if (config.scroll?.element === window) {
       builder = builder.use(withPage());
+    }
+
+    // Auto-detect Mode B: estimatedHeight/estimatedWidth without explicit height/width
+    const item = config.item;
+    const isHorizontal = config.orientation === "horizontal";
+    const hasExplicitSize = isHorizontal
+      ? item.width != null
+      : item.height != null;
+    const hasEstimate = isHorizontal
+      ? (item as unknown as Record<string, unknown>).estimatedWidth != null
+      : (item as unknown as Record<string, unknown>).estimatedHeight != null;
+    if (!hasExplicitSize && hasEstimate) {
+      builder = builder.use(withAutoSize());
     }
 
     if (config.adapter) {
