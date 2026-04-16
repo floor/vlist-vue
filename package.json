@@ -1,6 +1,6 @@
 {
   "name": "vlist-vue",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "Vue composable for vlist - lightweight virtual scrolling",
   "author": {
     "name": "Floor IO",
