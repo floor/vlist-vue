@@ -15,32 +15,32 @@ import {
   type ShallowRef,
 } from "vue";
 import type {
-  VListConfig,
   VListItem,
   VListEvents,
   EventHandler,
   Unsubscribe,
 } from "vlist";
-import { vlist, type VList } from "vlist";
 import {
-  withAsync,
-  withAutoSize,
-  withGrid,
-  withMasonry,
-  withGroups,
-  withSelection,
-  withScrollbar,
-  withScale,
-  withSnapshots,
-  withPage,
+  createVList as createVListCore,
+  page,
+  autosize,
+  async as asyncPlugin,
+  grid,
+  masonry,
+  groups,
+  selection,
+  scale,
+  scrollbar,
+  snapshots,
 } from "vlist";
+import type { VList, VListPlugin, CreateVListConfig } from "vlist";
 
 // Re-export types that appear in UseVListConfig / UseVListReturn
 export type {
   VListItem,
   VListEvents,
   VList,
-  VListConfig,
+  CreateVListConfig,
   ItemConfig,
   ItemTemplate,
   EventHandler,
@@ -48,7 +48,7 @@ export type {
 } from "vlist";
 
 export type UseVListConfig<T extends VListItem = VListItem> = Omit<
-  VListConfig<T>,
+  CreateVListConfig<T>,
   "container"
 >;
 
@@ -69,31 +69,25 @@ export function useVList<T extends VListItem = VListItem>(
 
     const config = unref(configInput);
 
-    let builder = vlist<T>({
-      ...config,
-      container,
-    });
+    const plugins: VListPlugin<T>[] = [];
 
     if (config.scroll?.element === window) {
-      builder = builder.use(withPage());
+      plugins.push(page());
     }
 
-    // Auto-detect Mode B: estimatedHeight/estimatedWidth without explicit height/width
     const item = config.item;
     const isHorizontal = config.orientation === "horizontal";
-    const hasExplicitSize = isHorizontal
-      ? item.width != null
-      : item.height != null;
+    const hasExplicitSize = isHorizontal ? item.width != null : item.height != null;
     const hasEstimate = isHorizontal
       ? (item as unknown as Record<string, unknown>).estimatedWidth != null
       : (item as unknown as Record<string, unknown>).estimatedHeight != null;
     if (!hasExplicitSize && hasEstimate) {
-      builder = builder.use(withAutoSize());
+      plugins.push(autosize());
     }
 
     if (config.adapter) {
-      builder = builder.use(
-        withAsync({
+      plugins.push(
+        asyncPlugin({
           adapter: config.adapter,
           ...(config.loading && { loading: config.loading }),
         }),
@@ -101,11 +95,11 @@ export function useVList<T extends VListItem = VListItem>(
     }
 
     if (config.layout === "grid" && config.grid) {
-      builder = builder.use(withGrid(config.grid));
+      plugins.push(grid(config.grid));
     }
 
     if (config.layout === "masonry" && config.masonry) {
-      builder = builder.use(withMasonry(config.masonry));
+      plugins.push(masonry(config.masonry));
     }
 
     if (config.groups) {
@@ -114,38 +108,35 @@ export function useVList<T extends VListItem = VListItem>(
         typeof groupsConfig.headerHeight === "function"
           ? groupsConfig.headerHeight("", 0)
           : groupsConfig.headerHeight;
-
-      builder = builder.use(
-        withGroups({
+      plugins.push(
+        groups({
           getGroupForIndex: groupsConfig.getGroupForIndex,
           headerHeight,
           headerTemplate: groupsConfig.headerTemplate,
-          ...(groupsConfig.sticky !== undefined && {
-            sticky: groupsConfig.sticky,
-          }),
+          ...(groupsConfig.sticky !== undefined && { sticky: groupsConfig.sticky }),
         }),
       );
     }
 
     const selectionMode = config.selection?.mode || "none";
     if (selectionMode !== "none") {
-      builder = builder.use(withSelection(config.selection));
+      plugins.push(selection(config.selection));
     } else {
-      builder = builder.use(withSelection({ mode: "none" }));
+      plugins.push(selection({ mode: "none" }));
     }
 
-    builder = builder.use(withScale());
+    plugins.push(scale());
 
     const scrollbarConfig = config.scroll?.scrollbar || config.scrollbar;
     if (scrollbarConfig !== "none") {
       const scrollbarOptions =
         typeof scrollbarConfig === "object" ? scrollbarConfig : {};
-      builder = builder.use(withScrollbar(scrollbarOptions));
+      plugins.push(scrollbar(scrollbarOptions));
     }
 
-    builder = builder.use(withSnapshots());
+    plugins.push(snapshots());
 
-    instance.value = builder.build();
+    instance.value = createVListCore<T>({ ...config, container }, plugins);
   });
 
   onBeforeUnmount(() => {
