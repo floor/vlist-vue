@@ -1,3 +1,5 @@
+import { createVList as createSynthetic } from "vlist/synthetic";
+import type { VListFactory } from "./index";
 /**
  * vlist-vue — real render tests
  *
@@ -96,4 +98,23 @@ describe("useVList — render", () => {
     expect(host.querySelectorAll(".row").length).toBeGreaterThan(0);
     app.unmount();
   });
+});
+
+it("forwards a typed synthetic factory and creates the synthetic driver", async () => {
+  let calls = 0;
+  let pluginNames: string[] = [];
+  const factory: VListFactory<Row> = (config, plugins = []) => {
+    calls++;
+    pluginNames = plugins.map(plugin => plugin.name);
+    expect(config).not.toHaveProperty("factory");
+    return createSynthetic(config, plugins);
+  };
+  const { host, app } = await mount({
+    factory, scroll: { mode: "synthetic" }, items: rows(100), item: { height: 40, template },
+  });
+  try {
+    expect(calls).toBe(1);
+    expect(host.querySelector<HTMLElement>(".vlist-viewport")!.style.touchAction).toBe("pan-x pinch-zoom");
+    expect(pluginNames).toEqual(["selection", "scale", "scrollbar", "snapshots"]);
+  } finally { app.unmount(); host.remove(); }
 });
