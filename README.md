@@ -1,11 +1,11 @@
 # vlist-vue
 
-Vue composable for [@floor/vlist](https://github.com/floor/vlist) — lightweight, zero-dependency virtual scrolling.
+Vue composable for [vlist](https://github.com/floor/vlist) — lightweight, zero-dependency virtual scrolling.
 
 ## Install
 
 ```bash
-npm install @floor/vlist vlist-vue
+npm install vlist vlist-vue
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install @floor/vlist vlist-vue
 ```vue
 <script setup>
 import { useVList } from 'vlist-vue';
-import '@floor/vlist/styles';
+import 'vlist/styles';
 
 const { containerRef, instance } = useVList({
   item: {
@@ -34,7 +34,7 @@ const { containerRef, instance } = useVList({
 - **`useVList(config)`** — Creates a virtual list. Returns `{ containerRef, instance }`. Config can be a plain object or a reactive `Ref` for automatic updates.
 - **`useVListEvent(instance, event, handler)`** — Subscribe to vlist events with automatic cleanup.
 
-Config accepts all [@floor/vlist options](https://vlist.dev/docs/api/reference) minus `container` (handled by the ref). Feature fields like `adapter`, `grid`, `groups`, `selection`, `scrollbar`, and `estimatedHeight` are translated into `.use(withX())` calls automatically.
+Config accepts all [vlist options](https://vlist.dev/docs/api/reference) minus `container` (handled by the ref). Feature fields like `adapter`, `grid`, `groups`, `selection`, `scrollbar`, and `estimatedHeight` are resolved into plugins automatically.
 
 ## Documentation
 
@@ -42,7 +42,7 @@ Full usage guide, feature config examples, and TypeScript types: **[Framework Ad
 
 ## Synthetic input
 
-Requires `vlist ^2.8.0`. Pass the synthetic entry as `factory` to opt in; the adapter forwards it unchanged through `vlist/config`. `VListFactory` is re-exported for typed custom factories. The factory is selected at mount; remount to change it.
+Requires `vlist ^3.0.0-next.1`. Pass the synthetic entry as `factory` to opt in; the adapter forwards it unchanged through `vlist/config`. `VListFactory` is re-exported for typed custom factories. The factory is selected at mount; remount to change it.
 
 ```vue
 <script setup lang="ts">
@@ -52,7 +52,6 @@ import { createVList } from "vlist/synthetic";
 const items = Array.from({ length: 1000 }, (_, id) => ({ id }));
 const { containerRef } = useVList({
   factory: createVList,
-  scroll: { mode: "synthetic" },
   items,
   item: { height: 48, template: item => String(item.id) },
 });

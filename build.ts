@@ -5,7 +5,7 @@ const isDev = process.argv.includes("--watch");
 
 async function build() {
   const start = performance.now();
-  console.log("🔨 Building @floor/vlist-vue...\n");
+  console.log("🔨 Building vlist-vue...\n");
 
   // Build the Vue composable
   const buildResult = await Bun.build({

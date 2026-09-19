@@ -60,7 +60,10 @@ export function useVList<T extends VListItem = VListItem>(
 
     const config = unref(configInput);
 
-    instance.value = createVListFromConfig<T>({ ...config, container });
+    // No type argument: vlist 3 takes two (the item and the config, so the
+    // instance carries the methods the config's feature fields imply), and
+    // both are inferred from the argument.
+    instance.value = createVListFromConfig({ ...config, container });
   });
 
   onBeforeUnmount(() => {
