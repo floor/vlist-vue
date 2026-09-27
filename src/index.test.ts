@@ -120,8 +120,8 @@ it("forwards a typed synthetic factory and creates the synthetic driver", async 
     expect(config).not.toHaveProperty("factory");
     return createSynthetic(config, plugins);
   };
-  // vlist 3: the factory is what selects synthetic input — `scroll.mode` is gone,
-  // and with it the plugins that option used to wire. A feature field still
+  // A factory from the deprecated vlist/synthetic still selects synthetic input
+  // (scroll.mode does it on the one entry, below). A feature field still
   // resolves to a plugin, which is what proves the composable forwards them.
   const { host, app } = await mount({
     factory, items: rows(100), item: { height: 40, template }, selection: { mode: "single" },
@@ -130,5 +130,18 @@ it("forwards a typed synthetic factory and creates the synthetic driver", async 
     expect(calls).toBe(1);
     expect(host.querySelector<HTMLElement>(".vlist-viewport")!.style.touchAction).toBe("pan-x pinch-zoom");
     expect(pluginNames).toEqual(["selection"]);
+  } finally { app.unmount(); host.remove(); }
+});
+
+it("forwards scroll.mode: the list goes synthetic and draws its scrollbar", async () => {
+  const { host, app } = await mount({
+    items: rows(100), item: { height: 40, template }, scroll: { mode: "synthetic" },
+  });
+  try {
+    // The driver loads on first need: wait for the handoff.
+    const viewport = host.querySelector<HTMLElement>(".vlist-viewport")!;
+    for (let i = 0; i < 200 && viewport.style.touchAction !== "pan-x pinch-zoom"; i++) await new Promise(r => setTimeout(r, 5));
+    expect(viewport.style.touchAction).toBe("pan-x pinch-zoom");
+    expect(host.querySelectorAll(".vlist-scrollbar")).toHaveLength(1);
   } finally { app.unmount(); host.remove(); }
 });
