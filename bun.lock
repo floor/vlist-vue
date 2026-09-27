@@ -9,11 +9,11 @@
         "@types/bun": "^1.0.0",
         "bun": "^1.0.0",
         "typescript": "^5.0.0",
-        "vlist": "^3.0.0",
+        "vlist": "^3.0.1-next.1",
         "vue": "^3.5.28",
       },
       "peerDependencies": {
-        "vlist": "^3.0.0",
+        "vlist": "^3.0.0 || ^3.0.1-next.1",
         "vue": ">=3.0.0",
       },
     },
@@ -109,7 +109,7 @@
 
     "undici-types": ["undici-types@7.19.2", "", {}, "sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg=="],
 
-    "vlist": ["vlist@3.0.0", "", {}, "sha512-goxUV1NEcaiJDU8rpGdV1u8zdDkpyD3d10hOMaHxPb1sf/7O4l6yLx4BSeqF0FWI1d1vVOY30fsfyQspOsmfLg=="],
+    "vlist": ["vlist@3.0.1-next.1", "", {}, "sha512-jOMqb7OCJsajAxHhLAHs7jgJ8BNT3ryyKdXNdMpmSJRG656YB3W/ZlmbxoIZ/4DCSyjSf4P+m4W+hrs4xidk0g=="],
 
     "vue": ["vue@3.5.32", "", { "dependencies": { "@vue/compiler-dom": "3.5.32", "@vue/compiler-sfc": "3.5.32", "@vue/runtime-dom": "3.5.32", "@vue/server-renderer": "3.5.32", "@vue/shared": "3.5.32" }, "peerDependencies": { "typescript": "*" }, "optionalPeers": ["typescript"] }, "sha512-vM4z4Q9tTafVfMAK7IVzmxg34rSzTFMyIe0UUEijUCkn9+23lj0WRfA83dg7eQZIUlgOSGrkViIaCfqSAUXsMw=="],
 
