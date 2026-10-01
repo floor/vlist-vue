@@ -16,7 +16,7 @@ async function build() {
     minify: !isDev,
     sourcemap: isDev ? "inline" : "none",
     naming: "index.js",
-    external: ["vue", "vlist", "vlist/config"],
+    external: ["vue", "vlist", "vlist/config", "vlist/vue"],
   });
 
   if (!buildResult.success) {

@@ -13,9 +13,9 @@ import type { VListFactory } from "./index";
 // happy-dom is registered via the ./happydom.ts preload (see bunfig.toml) so
 // that vue's runtime-dom captures a live `document` at import time.
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
-import { createApp, h, nextTick, type ShallowRef } from "vue";
-import { useVList } from "./index";
-import { autosize, selection, type VListItem, type VList } from "vlist";
+import { createApp, h, nextTick, ref, type ShallowRef } from "vue";
+import { useVList, useVListEvent } from "./index";
+import { autosize, createVList, selection, type VListItem, type VList } from "vlist";
 
 interface Row extends VListItem {
   id: string;
@@ -144,4 +144,64 @@ it("forwards scroll.mode: the list goes synthetic and draws its scrollbar", asyn
     expect(viewport.style.touchAction).toBe("pan-x pinch-zoom");
     expect(host.querySelectorAll(".vlist-scrollbar")).toHaveLength(1);
   } finally { app.unmount(); host.remove(); }
+});
+
+describe("3.1 compat: the config API on vlist/vue", () => {
+  it("resolves a feature field to its plugin", async () => {
+    const { app, captured } = await mount({ item: { height: 40, template }, items: rows(10), selection: { mode: "single" } });
+    const list = captured.instance!.value as unknown as { select(id: string): void; getSelected(): unknown[] };
+    list.select("row-2");
+    expect(list.getSelected()).toEqual(["row-2"]);
+    app.unmount();
+  });
+
+  it("updates the list when a Ref config's items change", async () => {
+    const config = ref({ item: { height: 40, template }, items: rows(3) });
+    const { host, app } = await mount(config);
+    expect(host.querySelectorAll(".row").length).toBe(3);
+    config.value = { ...config.value, items: rows(5) };
+    await nextTick();
+    await flush();
+    expect(host.querySelectorAll(".row").length).toBe(5);
+    app.unmount();
+  });
+
+  it("useVListEvent receives events and unsubscribes on unmount (3.0.1's fix)", async () => {
+    let offs = 0;
+    const factory: VListFactory<Row> = (config, plugins = []) => {
+      const list = createVList(config, plugins);
+      const on = list.on.bind(list);
+      list.on = ((event, handler) => {
+        const off = on(event, handler);
+        return () => { offs++; off(); };
+      }) as typeof list.on;
+      return list;
+    };
+    const clicked: string[] = [];
+    const warnings: unknown[] = [];
+    const warn = console.warn;
+    console.warn = (...args: unknown[]) => { warnings.push(args[0]); };
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const app = createApp({
+      setup() {
+        const { containerRef, instance } = useVList<Row>({ factory, items: rows(10), item: { height: 40, template } });
+        useVListEvent(instance, "item:click", ({ item }) => { clicked.push(item.id); });
+        return () => h("div", { ref: containerRef, style: { height: `${VIEWPORT_H}px` } });
+      },
+    });
+    try {
+      app.mount(host);
+      await nextTick();
+      await flush();
+      host.querySelector<HTMLElement>('[data-index="2"]')!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      expect(clicked).toEqual(["row-2"]);
+      app.unmount();
+      expect(offs).toBe(1);
+      expect(warnings).toEqual([]);
+    } finally {
+      console.warn = warn;
+      host.remove();
+    }
+  });
 });
