@@ -14,8 +14,8 @@ import type { VListFactory } from "./index";
 // that vue's runtime-dom captures a live `document` at import time.
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { createApp, h, nextTick, type ShallowRef } from "vue";
-import { useVList } from "./index";
-import { autosize, selection, type VListItem, type VList } from "vlist";
+import { useVList, useVListEvent } from "./index";
+import { autosize, createVList, selection, type VListItem, type VList } from "vlist";
 
 interface Row extends VListItem {
   id: string;
@@ -131,4 +131,46 @@ it("forwards a typed synthetic factory and creates the synthetic driver", async 
     expect(host.querySelector<HTMLElement>(".vlist-viewport")!.style.touchAction).toBe("pan-x pinch-zoom");
     expect(pluginNames).toEqual(["selection"]);
   } finally { app.unmount(); host.remove(); }
+});
+
+it("useVListEvent receives events and unsubscribes on unmount", async () => {
+  // The list is created in onMounted, after setup: an unmount hook registered
+  // from the watch callback is dropped with a Vue warning, and the
+  // subscription is never released.
+  let offs = 0;
+  const factory: VListFactory<Row> = (config, plugins = []) => {
+    const list = createVList(config, plugins);
+    const on = list.on.bind(list);
+    list.on = ((event, handler) => {
+      const off = on(event, handler);
+      return () => { offs++; off(); };
+    }) as typeof list.on;
+    return list;
+  };
+  const clicked: string[] = [];
+  const warnings: unknown[] = [];
+  const warn = console.warn;
+  console.warn = (...args: unknown[]) => { warnings.push(args[0]); };
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  const app = createApp({
+    setup() {
+      const { containerRef, instance } = useVList<Row>({ factory, items: rows(10), item: { height: 40, template } });
+      useVListEvent(instance, "item:click", ({ item }) => { clicked.push(item.id); });
+      return () => h("div", { ref: containerRef, style: { height: `${VIEWPORT_H}px` } });
+    },
+  });
+  try {
+    app.mount(host);
+    await nextTick();
+    await flush();
+    host.querySelector<HTMLElement>('[data-index="2"]')!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(clicked).toEqual(["row-2"]);
+    app.unmount();
+    expect(offs).toBe(1);
+    expect(warnings).toEqual([]);
+  } finally {
+    console.warn = warn;
+    host.remove();
+  }
 });
