@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-10-01
+
+A patch for vlist 3.0.x; `peerDependencies.vlist` stays `^3.0.0`.
+
+### Fixed
+
+- `useVListEvent` now unsubscribes when the component unmounts. The list is created in
+  `onMounted`, so the watch callback that subscribed ran outside setup: its `onBeforeUnmount`
+  was dropped with a Vue warning ("onBeforeUnmount is called when there is no active component
+  instance") and the handler stayed on the list until it was destroyed. The hook is now
+  registered during setup, and a new instance replaces the old subscription.
+
 ## [3.0.0-next.1] - 2026-09-19
 
 ### Changed

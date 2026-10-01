@@ -97,22 +97,21 @@ export function useVListEvent<
   handler: EventHandler<VListEvents<T>[K]>,
 ): void {
   const handlerRef = ref(handler);
+  let unsub: Unsubscribe | undefined;
 
+  // The list is created in onMounted, so the watch callback runs outside
+  // setup: the unmount hook is registered here, during setup, instead.
   watch(
     () => instanceRef.value,
     (instance) => {
-      if (!instance) return;
-
-      const wrappedHandler: EventHandler<VListEvents<T>[K]> = (payload) => {
-        handlerRef.value(payload);
-      };
-
-      const unsub: Unsubscribe = instance.on(event, wrappedHandler);
-
-      onBeforeUnmount(() => {
-        unsub();
-      });
+      unsub?.();
+      unsub = instance?.on(event, (payload) => handlerRef.value(payload));
     },
     { immediate: true },
   );
+
+  onBeforeUnmount(() => {
+    unsub?.();
+    unsub = undefined;
+  });
 }
