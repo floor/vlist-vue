@@ -32,7 +32,7 @@ const { containerRef, instance } = useVList({
 ## API
 
 - **`useVList(config)`** — Creates a virtual list. Returns `{ containerRef, instance }`. Config can be a plain object or a reactive `Ref` for automatic updates.
-- **`useVListEvent(instance, event, handler)`** — Subscribe to vlist events with automatic cleanup.
+- **`useVListEvent(instance, event, handler)`** — Subscribe to vlist events; the subscription ends when the component unmounts (fixed in 3.0.1).
 
 Config accepts all [vlist options](https://vlist.dev/docs/api/reference) minus `container` (handled by the ref). Feature fields like `adapter`, `grid`, `groups`, `selection`, `scrollbar`, and `estimatedHeight` are resolved into plugins automatically.
 
@@ -42,7 +42,7 @@ Full usage guide, feature config examples, and TypeScript types: **[Framework Ad
 
 ## Synthetic input
 
-Requires `vlist ^3.0.0-next.1`. Pass the synthetic entry as `factory` to opt in; the adapter forwards it unchanged through `vlist/config`. `VListFactory` is re-exported for typed custom factories. The factory is selected at mount; remount to change it.
+Requires `vlist ^3.0.0`. Pass the synthetic entry as `factory` to opt in; the adapter forwards it unchanged through `vlist/config`. `VListFactory` is re-exported for typed custom factories. The factory is selected at mount; remount to change it.
 
 ```vue
 <script setup lang="ts">
