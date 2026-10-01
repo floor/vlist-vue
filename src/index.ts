@@ -1,27 +1,20 @@
 // vlist-vue
 /**
  * Vue composable for vlist - lightweight virtual scrolling
+ *
+ * Deprecated: use `vlist/vue` from the vlist package, which takes features as
+ * plugins (`useVList({ items, item }, [selection()])`). This package keeps the
+ * config-based API on top of it: the composables are `vlist/vue`'s, building
+ * the list with `createVListFromConfig` so feature fields still resolve to
+ * plugins.
  */
 
-import {
-  ref,
-  shallowRef,
-  onMounted,
-  onBeforeUnmount,
-  watch,
-  isRef,
-  unref,
-  type Ref,
-  type ShallowRef,
-} from "vue";
-import type {
-  VListItem,
-  VListEvents,
-  EventHandler,
-  Unsubscribe,
-} from "vlist";
-import type { VList } from "vlist";
+import type { Ref, ShallowRef } from "vue";
+import type { VListItem, VList } from "vlist";
 import { createVListFromConfig, type VListConfig } from "vlist/config";
+import { useVList as useEntry, useVListEvent } from "vlist/vue";
+
+export { useVListEvent };
 
 // Re-export types that appear in UseVListConfig / UseVListReturn
 export type {
@@ -48,71 +41,11 @@ export interface UseVListReturn<T extends VListItem = VListItem> {
   instance: ShallowRef<VList<T> | null>;
 }
 
+/** `vlist/vue`'s factory argument: builds from the whole config. */
+const fromConfig = createVListFromConfig as unknown as Parameters<typeof useEntry>[2];
+
 export function useVList<T extends VListItem = VListItem>(
   configInput: UseVListConfig<T> | Ref<UseVListConfig<T>>,
 ): UseVListReturn<T> {
-  const containerRef = ref<HTMLDivElement | null>(null);
-  const instance = shallowRef<VList<T> | null>(null);
-
-  onMounted(() => {
-    const container = containerRef.value;
-    if (!container) return;
-
-    const config = unref(configInput);
-
-    // No type argument: vlist 3 takes two (the item and the config, so the
-    // instance carries the methods the config's feature fields imply), and
-    // both are inferred from the argument.
-    instance.value = createVListFromConfig({ ...config, container });
-  });
-
-  onBeforeUnmount(() => {
-    instance.value?.destroy();
-    instance.value = null;
-  });
-
-  if (isRef(configInput)) {
-    watch(
-      () => configInput.value.items,
-      (newItems) => {
-        if (instance.value && newItems) {
-          instance.value.setItems(newItems);
-        }
-      },
-    );
-  }
-
-  return {
-    containerRef,
-    instance,
-  };
-}
-
-export function useVListEvent<
-  T extends VListItem,
-  K extends keyof VListEvents<T>,
->(
-  instanceRef: Ref<VList<T> | null> | ShallowRef<VList<T> | null>,
-  event: K,
-  handler: EventHandler<VListEvents<T>[K]>,
-): void {
-  const handlerRef = ref(handler);
-
-  watch(
-    () => instanceRef.value,
-    (instance) => {
-      if (!instance) return;
-
-      const wrappedHandler: EventHandler<VListEvents<T>[K]> = (payload) => {
-        handlerRef.value(payload);
-      };
-
-      const unsub: Unsubscribe = instance.on(event, wrappedHandler);
-
-      onBeforeUnmount(() => {
-        unsub();
-      });
-    },
-    { immediate: true },
-  );
+  return useEntry<T>(configInput as Parameters<typeof useEntry<T>>[0], [], fromConfig) as UseVListReturn<T>;
 }
