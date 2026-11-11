@@ -10,8 +10,15 @@
  */
 
 import type { Ref, ShallowRef } from "vue";
-import type { VListItem, VList } from "vlist";
-import { createVListFromConfig, type VListConfig } from "vlist/config";
+import type {
+  VListItem,
+  VList,
+  VListPlugin,
+  TableMethods,
+  ColumnPinMethods,
+  ColumnReorderMethods,
+} from "vlist";
+import { createVListFromConfig, type VListConfig, type ConfigMethods } from "vlist/config";
 import { useVList as useEntry, useVListEvent } from "vlist/vue";
 
 export { useVListEvent };
@@ -21,13 +28,23 @@ export type {
   VListItem,
   VListEvents,
   VList,
+  VListPlugin,
   CreateVListConfig,
   ItemConfig,
   ItemTemplate,
   EventHandler,
   Unsubscribe,
+  TableColumn,
+  TablePluginConfig,
+  TableMethods,
+  TableFeature,
+  TableFeatureMethods,
+  ColumnPinConfig,
+  ColumnPinMethods,
+  ColumnReorderConfig,
+  ColumnReorderMethods,
 } from "vlist";
-export type { VListConfig, VListFactory } from "vlist/config";
+export type { VListConfig, VListFactory, ConfigMethods } from "vlist/config";
 
 /**
  * Configuration for {@link useVList}. vlist's high-level `VListConfig` (feature
@@ -36,16 +53,62 @@ export type { VListConfig, VListFactory } from "vlist/config";
  */
 export type UseVListConfig<T extends VListItem = VListItem> = VListConfig<T>;
 
-export interface UseVListReturn<T extends VListItem = VListItem> {
+type InstanceMethods<T extends VListItem, M> = M extends UseVListConfig<T> ? ConfigMethods<T, M> : M;
+
+export interface UseVListReturn<
+  T extends VListItem = VListItem,
+  M = {},
+> {
   containerRef: Ref<HTMLDivElement | null>;
-  instance: ShallowRef<VList<T> | null>;
+  instance: ShallowRef<(VList<T> & InstanceMethods<T, M>) | null>;
 }
+
+type WithPlugin<T extends VListItem, M> = Omit<UseVListConfig<T>, "plugins"> & {
+  plugins:
+    | readonly [VListPlugin<any, M>, ...(readonly VListPlugin<any, any>[])]
+    | readonly [...(readonly VListPlugin<any, any>[]), VListPlugin<any, M>];
+};
 
 /** `vlist/vue`'s factory argument: builds from the whole config. */
 const fromConfig = createVListFromConfig as unknown as Parameters<typeof useEntry>[2];
 
+export function useVList<
+  T extends VListItem,
+  const C extends UseVListConfig<NoInfer<T>> & { items: readonly T[] },
+>(
+  configInput:
+    | ({ items: readonly T[] } & UseVListConfig<NoInfer<T>> & C)
+    | Ref<{ items: readonly T[] } & UseVListConfig<NoInfer<T>> & C>,
+): UseVListReturn<T, ConfigMethods<T, C>>;
+export function useVList<
+  T extends VListItem,
+  const C extends UseVListConfig<T>,
+>(
+  configInput: (UseVListConfig<T> & C) | Ref<UseVListConfig<T> & C>,
+): UseVListReturn<T, ConfigMethods<T, C>>;
+export function useVList<T extends VListItem = VListItem>(
+  configInput:
+    | WithPlugin<T, TableMethods<T> & ColumnPinMethods & ColumnReorderMethods>
+    | Ref<WithPlugin<T, TableMethods<T> & ColumnPinMethods & ColumnReorderMethods>>,
+): UseVListReturn<T, TableMethods<T> & ColumnPinMethods & ColumnReorderMethods>;
+export function useVList<T extends VListItem = VListItem>(
+  configInput:
+    | WithPlugin<T, TableMethods<T> & ColumnPinMethods>
+    | Ref<WithPlugin<T, TableMethods<T> & ColumnPinMethods>>,
+): UseVListReturn<T, TableMethods<T> & ColumnPinMethods>;
+export function useVList<T extends VListItem = VListItem>(
+  configInput:
+    | WithPlugin<T, TableMethods<T> & ColumnReorderMethods>
+    | Ref<WithPlugin<T, TableMethods<T> & ColumnReorderMethods>>,
+): UseVListReturn<T, TableMethods<T> & ColumnReorderMethods>;
+export function useVList<T extends VListItem = VListItem>(
+  configInput: WithPlugin<T, TableMethods<T>> | Ref<WithPlugin<T, TableMethods<T>>>,
+): UseVListReturn<T, TableMethods<T>>;
 export function useVList<T extends VListItem = VListItem>(
   configInput: UseVListConfig<T> | Ref<UseVListConfig<T>>,
-): UseVListReturn<T> {
-  return useEntry<T>(configInput as Parameters<typeof useEntry<T>>[0], [], fromConfig) as UseVListReturn<T>;
+): UseVListReturn<T>;
+export function useVList<T extends VListItem = VListItem>(
+  configInput: UseVListConfig<T> | WithPlugin<T, unknown> | Ref<UseVListConfig<T> | WithPlugin<T, unknown>>,
+): UseVListReturn<T, never> {
+  return useEntry<T>(configInput as Parameters<typeof useEntry<T>>[0], [], fromConfig) as UseVListReturn<T, never>;
 }

@@ -9,11 +9,11 @@
         "@types/bun": "^1.0.0",
         "bun": "^1.0.0",
         "typescript": "^5.0.0",
-        "vlist": "3.1.0",
+        "vlist": "3.7.2",
         "vue": "^3.5.28",
       },
       "peerDependencies": {
-        "vlist": "^3.1.0-next.3",
+        "vlist": "^3.7.0",
         "vue": ">=3.0.0",
       },
     },
@@ -109,7 +109,7 @@
 
     "undici-types": ["undici-types@7.19.2", "", {}, "sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg=="],
 
-    "vlist": ["vlist@3.1.0", "", { "peerDependencies": { "react": ">=17.0.0", "solid-js": ">=1.6.0", "svelte": ">=4.0.0", "vue": ">=3.0.0" }, "optionalPeers": ["react", "solid-js", "svelte", "vue"] }, "sha512-j+HmJJJj4USnbrMgf/KrR6f7m5QsF4WEx3uSDqcuvnf/vJujeYKGKN7+XyM0LkdUKsc7BBYJbiMuTqr3HuppYA=="],
+    "vlist": ["vlist@3.7.2", "", { "peerDependencies": { "react": ">=17.0.0", "solid-js": ">=1.6.0", "svelte": ">=4.0.0", "vue": ">=3.0.0" }, "optionalPeers": ["react", "solid-js", "svelte", "vue"] }, "sha512-oLMgDDNRBvg2/jn1LXab0KuQOt2C3HF6agRwfjYOWuWtskRdtVFrZTnA5MDNC09QB138E9d2BbFm6Nybiw/Pig=="],
 
     "vue": ["vue@3.5.32", "", { "dependencies": { "@vue/compiler-dom": "3.5.32", "@vue/compiler-sfc": "3.5.32", "@vue/runtime-dom": "3.5.32", "@vue/server-renderer": "3.5.32", "@vue/shared": "3.5.32" }, "peerDependencies": { "typescript": "*" }, "optionalPeers": ["typescript"] }, "sha512-vM4z4Q9tTafVfMAK7IVzmxg34rSzTFMyIe0UUEijUCkn9+23lj0WRfA83dg7eQZIUlgOSGrkViIaCfqSAUXsMw=="],
 
