@@ -32,7 +32,7 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "vlist": "^3.1.0",
+    "vlist": "^3.7.0",
     "vue": ">=3.0.0"
   },
   "files": [
@@ -52,7 +52,7 @@
     "@types/bun": "^1.0.0",
     "bun": "^1.0.0",
     "typescript": "^5.0.0",
-    "vlist": "3.1.0",
+    "vlist": "3.7.2",
     "vue": "^3.5.28"
   }
 }

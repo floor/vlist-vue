@@ -14,8 +14,8 @@ import type { VListFactory } from "./index";
 // that vue's runtime-dom captures a live `document` at import time.
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 import { createApp, h, nextTick, ref, type ShallowRef } from "vue";
-import { useVList, useVListEvent } from "./index";
-import { autosize, createVList, selection, type VListItem, type VList } from "vlist";
+import { useVList, useVListEvent, type TableColumn } from "./index";
+import { autosize, columnPin, columnReorder, createVList, selection, table, type VListItem, type VList } from "vlist";
 
 interface Row extends VListItem {
   id: string;
@@ -201,6 +201,92 @@ describe("3.1 compat: the config API on vlist/vue", () => {
       expect(warnings).toEqual([]);
     } finally {
       console.warn = warn;
+      host.remove();
+    }
+  });
+
+  it("types and runs table({ features: [columnPin(), columnReorder()] }) without casts", async () => {
+    interface TableRow extends VListItem {
+      id: string;
+      name: string;
+      role: string;
+    }
+    const columns: TableColumn<TableRow>[] = [
+      { key: "name", label: "Name", width: 150 },
+      { key: "role", label: "Role", width: 100 },
+    ];
+    const tableRows: TableRow[] = [
+      { id: "1", name: "Ada", role: "Engineer" },
+      { id: "2", name: "Grace", role: "Architect" },
+    ];
+
+    let orderAfterMove: string[] = [];
+    let pinsAfterPin: Record<string, "left" | "right"> = {};
+
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const app = createApp({
+      setup() {
+        const { containerRef, instance } = useVList({
+          items: tableRows,
+          item: { height: 40, template: (r) => r.name },
+          plugins: [
+            table({
+              columns,
+              rowHeight: 40,
+              features: [columnPin(), columnReorder()],
+            }),
+          ],
+        });
+        const verifyExplicit = () => {
+          const explicit = useVList<TableRow>({
+            items: tableRows,
+            item: { height: 40, template: (r) => r.name },
+            plugins: [
+              table<TableRow>({
+                columns,
+                rowHeight: 40,
+                features: [columnPin(), columnReorder()],
+              }),
+            ],
+          });
+          explicit.instance.value?.setColumnPin("name", "right");
+          explicit.instance.value?.moveColumn("name", 1);
+
+          const pinOnly = useVList<TableRow>({
+            items: tableRows,
+            item: { height: 40, template: (r) => r.name },
+            plugins: [table<TableRow>({ columns, rowHeight: 40, features: [columnPin()] })],
+          });
+          pinOnly.instance.value?.setColumnPin("name", "left");
+          // @ts-expect-error columnReorder() was not configured on pinOnly
+          pinOnly.instance.value?.moveColumn("role", 0);
+        };
+        void verifyExplicit;
+        return () =>
+          h("div", {
+            ref: containerRef,
+            style: { height: `${VIEWPORT_H}px` },
+            onClick: () => {
+              const list = instance.value!;
+              list.moveColumn("role", 0);
+              orderAfterMove = list.getColumnOrder();
+              list.setColumnPin("name", "left");
+              pinsAfterPin = list.getColumnPins();
+            },
+          });
+      },
+    });
+    try {
+      app.mount(host);
+      await nextTick();
+      await flush();
+      host.firstElementChild!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      expect(orderAfterMove).toEqual(["role", "name"]);
+      expect(pinsAfterPin).toEqual({ name: "left" });
+      expect(host.querySelector(".vlist-table-header-cell--pin-left")).not.toBeNull();
+    } finally {
+      app.unmount();
       host.remove();
     }
   });
